@@ -1,0 +1,11 @@
+{
+  "research": "basics",
+  "instability": 1,
+  "central": { "item": "minecraft:amethyst_shard" },
+  "components": [
+    { "item": "minecraft:quartz" },
+    { "item": "minecraft:ender_pearl" }
+  ],
+  "result": { "item": "thaumic_reborn_example:echo_focus" },
+  "essentia": { "aer": 8, "ordo": 8, "praecantatio": 8 }
+}

@@ -1,0 +1,6 @@
+{
+  "research": "basics",
+  "catalyst": { "item": "minecraft:iron_helmet" },
+  "output": { "item": "thaumic_reborn_example:revealing_helmet" },
+  "aspects": { "sensus": 8, "tutamen": 8, "praecantatio": 4 }
+}
