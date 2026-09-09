@@ -22,10 +22,17 @@ an addon.
 - vis-network routes, attunements, availability and machine consumption;
 - golem configuration, constructions, mirrors, node jars, taint/biomes/Outer Lands,
   item decomposition and stable alchemical/device snapshots;
-- equipment extension markers and client-only aspect/HUD integration.
+- equipment extension contracts, including stack-aware raised-waist armor
+  compatibility, and client-only aspect/HUD integration.
 
 Everything under `com.thaumicreborn.api.client` is client-only. Common or
 dedicated-server code must not load those classes.
+
+Addon leggings whose model rises into the lower chest-armor region can implement
+`com.thaumicreborn.api.equipment.RaisedWaistArmor`. Its default method makes the
+interface a simple marker; override `hasRaisedWaist(ItemStack)` only when the
+answer depends on that stack's state. The contract is common-side and contains
+no renderer or other client-only types.
 
 ## Datapacks
 

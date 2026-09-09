@@ -54,8 +54,24 @@ var wand = com.thaumicreborn.api.ThaumicRebornApi.wands()
 Для собственного фокуса item реализует `FocusItem`, а поведение регистрируется
 через `foci().register(...)`. Для прямого подключения block entity к трубам
 реализуйте `EssentiaTransport`. Экипировка может реализовать `VisDiscountGear`,
-`RevealingGear`, `RunicArmor`, `ThaumicRepairable`; entity, которую не должна
-конвертировать taint-система, — `TaintImmune`.
+`RevealingGear`, `RunicArmor`, `ThaumicRepairable`; поножи с геометрией пояса,
+заходящей в нижнюю часть нагрудника, — `RaisedWaistArmor`; entity, которую не
+должна конвертировать taint-система, — `TaintImmune`.
+
+Для постоянного поднятого пояса достаточно реализовать интерфейс без методов:
+
+```java
+public final class AddonLeggingsItem extends ArmorItem
+        implements com.thaumicreborn.api.equipment.RaisedWaistArmor {
+    // Обычная реализация предмета аддона.
+}
+```
+
+Если геометрия зависит от NBT или другого состояния предмета, переопределите
+`boolean hasRaisedWaist(ItemStack stack)`. Контракт common-side: он не импортирует
+классы рендера или другие client-only типы. Thaumic Reborn отдельно проверяет,
+что предмет надет именно в слот поножей, прежде чем скрыть конфликтующую поясную
+геометрию своего нагрудника.
 
 ## Пути и основные форматы datapack
 

@@ -54,6 +54,21 @@ tasks.register('verifyApiSources') {
         if (file('src/main/resources/META-INF/mods.toml').exists()) {
             throw new GradleException('the API library must not declare a Forge mod')
         }
+        def raisedWaistSource = file(
+                'src/main/java/com/thaumicreborn/api/equipment/RaisedWaistArmor.java')
+        if (!raisedWaistSource.isFile()) {
+            throw new GradleException('raised-waist equipment contract is missing')
+        }
+        def commonClientImports = fileTree('src/main/java/com/thaumicreborn/api') {
+            include '**/*.java'
+            exclude 'client/**'
+        }.files.findAll {
+            it.getText('UTF-8').contains('net.minecraft.client')
+        }
+        if (!commonClientImports.empty) {
+            throw new GradleException(
+                    "common API sources import client-only Minecraft classes: ${commonClientImports}")
+        }
     }
 }
 
@@ -67,6 +82,11 @@ tasks.register('verifyApiJar') {
         }
         if (tree.matching { include 'com/thaumicreborn/api/**/*.class' }.isEmpty()) {
             throw new GradleException('API JAR contains no public API classes')
+        }
+        if (tree.matching {
+            include 'com/thaumicreborn/api/equipment/RaisedWaistArmor.class'
+        }.isEmpty()) {
+            throw new GradleException('API JAR is missing RaisedWaistArmor')
         }
     }
 }

@@ -5,6 +5,8 @@ import com.thaumicreborn.api.knowledge.WarpType;
 import com.thaumicreborn.api.research.ResearchDefinition;
 import com.thaumicreborn.api.focus.FocusDefinition;
 import com.thaumicreborn.api.aura.AuraNode;
+import com.thaumicreborn.api.equipment.RaisedWaistArmor;
+import net.minecraft.world.item.ItemStack;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Files;
@@ -67,6 +69,28 @@ class ApiContractTest {
         assertFalse(docs.contains("thaumcraft" + "modern"));
         assertEquals("thaumic_reborn:arcane_shaped", DatapackPaths.ARCANE_SHAPED.toString());
         assertEquals("thaumcraft/research", DatapackPaths.RESEARCH);
+    }
+
+    @Test
+    void raisedWaistArmorIsACommonStackAwareMarker() throws Exception {
+        var method = RaisedWaistArmor.class.getDeclaredMethod(
+                "hasRaisedWaist", ItemStack.class);
+        assertEquals(boolean.class, method.getReturnType());
+        assertTrue(method.isDefault());
+        assertTrue(new RaisedWaistArmor() { }.hasRaisedWaist(null));
+
+        RaisedWaistArmor stackAware = new RaisedWaistArmor() {
+            @Override
+            public boolean hasRaisedWaist(ItemStack stack) {
+                return false;
+            }
+        };
+        assertFalse(stackAware.hasRaisedWaist(null));
+
+        String source = Files.readString(Path.of(
+                "src/main/java/com/thaumicreborn/api/equipment/RaisedWaistArmor.java"));
+        assertTrue(source.contains("net.minecraft.world.item.ItemStack"));
+        assertFalse(source.contains("net.minecraft.client"));
     }
 
     private static List<String> componentNames(Class<?> type) {
