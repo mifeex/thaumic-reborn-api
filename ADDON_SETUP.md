@@ -14,7 +14,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly fg.deobf('com.thaumicreborn:thaumic-reborn-api:2.0.0')
+    compileOnly fg.deobf('com.thaumicreborn:thaumic-reborn-api:2.0.1')
 }
 ```
 

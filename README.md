@@ -1,7 +1,7 @@
 # Thaumic Reborn API
 
 Compile-time API for addons targeting Thaumic Reborn on Minecraft Forge 1.20.1.
-Version 2.0.0 follows the current `thaumic_reborn` mod and resource namespace.
+Version 2.0.1 follows the current `thaumic_reborn` mod and resource namespace.
 This artifact is a Java library, not a separately installed Forge mod.
 
 Addon developers must use the API as `compileOnly`. The main Thaumic Reborn JAR

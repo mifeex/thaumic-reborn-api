@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ApiContractTest {
     @Test
     void versionAndModIdMatchTheMajorContract() {
-        assertEquals("2.0.0", ThaumicRebornApi.API_VERSION);
+        assertEquals("2.0.1", ThaumicRebornApi.API_VERSION);
         assertEquals("thaumic_reborn", ThaumicRebornApi.MOD_ID);
     }
 
