@@ -10,6 +10,13 @@ import com.thaumicreborn.api.knowledge.KnowledgeApi;
 import com.thaumicreborn.api.research.ResearchApi;
 import com.thaumicreborn.api.scan.ScanApi;
 import com.thaumicreborn.api.wand.WandApi;
+import com.thaumicreborn.api.alchemy.AlchemyApi;
+import com.thaumicreborn.api.construction.ConstructionApi;
+import com.thaumicreborn.api.device.DeviceApi;
+import com.thaumicreborn.api.golem.GolemApi;
+import com.thaumicreborn.api.link.LinkApi;
+import com.thaumicreborn.api.vis.VisNetworkApi;
+import com.thaumicreborn.api.world.WorldApi;
 
 /** Main-mod service provider. Addons consume it through {@link ThaumicRebornApi}. */
 public interface ApiServices {
@@ -32,4 +39,18 @@ public interface ApiServices {
     FocusApi foci();
 
     EquipmentApi equipment();
+
+    VisNetworkApi visNetwork();
+
+    GolemApi golems();
+
+    WorldApi world();
+
+    ConstructionApi constructions();
+
+    LinkApi links();
+
+    DeviceApi devices();
+
+    AlchemyApi alchemy();
 }

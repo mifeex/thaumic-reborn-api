@@ -1,51 +1,59 @@
 # Thaumic Reborn API
 
-Compile-time API for addons targeting Thaumic Reborn on Minecraft Forge
-1.20.1. This project is not a separately installed mod.
+Compile-time API for addons targeting Thaumic Reborn on Minecraft Forge 1.20.1.
+Version 2.0.0 follows the current `thaumic_reborn` mod and resource namespace.
+This artifact is a Java library, not a separately installed Forge mod.
 
-Addon developers use the published artifact as `compileOnly`. The same API
-classes are built into the main Thaumic Reborn JAR, so a player installs only:
+Addon developers must use the API as `compileOnly`. The main Thaumic Reborn JAR
+supplies these exact classes at runtime, so players install only the main mod and
+their addons. Never shade, JarJar, unpack, or otherwise copy the API classes into
+an addon.
 
-- `thaumic-reborn-<version>.jar`;
-- the addon JAR.
+## Surface
 
-Do not shade, jar-in-jar, or otherwise copy this API artifact into an addon.
-The addon's `mods.toml` dependency must target the compatibility mod ID
-`thaumcraftmodern`.
+`ThaumicRebornApi` exposes immutable definitions and narrow services for:
 
-Datapack definitions supplied by addons are discovered across namespaces:
+- aspects, scans, arcane/crucible/infusion recipes and essentia transport;
+- complete research definitions/categories/conditions/pages and authoritative
+  reveal, availability, note, reconcile and purchase operations;
+- player aspect knowledge, criteria, research state, warp counters and runic state;
+- wand components/vis, focus behavior, five-rank upgrades and 18-slot pouches;
+- aura-node snapshots, spatial queries and revision-aware mutations;
+- vis-network routes, attunements, availability and machine consumption;
+- golem configuration, constructions, mirrors, node jars, taint/biomes/Outer Lands,
+  item decomposition and stable alchemical/device snapshots;
+- equipment extension markers and client-only aspect/HUD integration.
 
-- `data/<addonid>/thaumcraft/aspects`;
-- `data/<addonid>/thaumcraft/research`;
-- `data/<addonid>/thaumcraft/scans`;
-- `data/<addonid>/thaumcraft/crucible_recipes`;
-- `data/<addonid>/thaumcraft/infusion_recipes`;
-- `data/<addonid>/thaumcraft/wands`.
+Everything under `com.thaumicreborn.api.client` is client-only. Common or
+dedicated-server code must not load those classes.
 
-Arcane recipes use `data/<addonid>/recipes` with type
-`thaumcraftmodern:arcane_shaped` or `thaumcraftmodern:arcane_shapeless`.
+## Datapacks
 
-The Java API is intended for runtime queries, server-authoritative player
-knowledge changes, wand creation, and behavior that cannot be expressed as
-data.
+The current reload listeners intentionally retain the historical `thaumcraft/`
+folder beneath each namespace. Addon definitions are loaded from:
 
-## API 1.1
+- `data/<addonid>/thaumcraft/aspects/*.json`
+- `data/<addonid>/thaumcraft/categories/*.json`
+- `data/<addonid>/thaumcraft/research/*.json`
+- `data/<addonid>/thaumcraft/scans/*.json`
+- `data/<addonid>/thaumcraft/crucible_recipes/*.json`
+- `data/<addonid>/thaumcraft/infusion_recipes/*.json`
+- `data/<addonid>/thaumcraft/wands/*.json`
+- `data/<addonid>/thaumcraft/constructions/*.json`
+- `data/<addonid>/thaumcraft/essentia_transports/*.json`
 
-- Implement `com.thaumicreborn.api.essentia.EssentiaTransport` on an addon
-  block entity to connect it directly to the essentia network.
-- `ThaumicRebornApi.aura()` exposes immutable node snapshots, one-time node
-  initialization, and revision-checked server mutation.
-- Implement `FocusItem`, then register its `FocusDefinition` and
-  `FocusBehavior` through `ThaumicRebornApi.foci()` during common setup. The
-  wand, focus wheel, vis payment, continuous casting, and cooldown paths all
-  recognize it.
-- Armor, weapons, tools, and accessories can opt into `VisDiscountGear`,
-  `RevealingGear`, `RunicArmor`, and `ThaumicRepairable`. Registration remains
-  normal Forge `DeferredRegister` registration.
-- Client code can use `ThaumicRebornClientApi.aspects()` for the original
-  aspect renderer and `ThaumicRebornClientApi.hud()` to add addon containers
-  to the shared revealing-gear HUD.
+Ordinary recipe-manager files remain in `data/<addonid>/recipes/*.json`.
+Thaumic recipe serializer IDs are `thaumic_reborn:arcane_shaped`,
+`thaumic_reborn:arcane_shapeless`, `thaumic_reborn:arcane_wand_assembly`,
+`thaumic_reborn:arcane_sceptre_assembly`, `thaumic_reborn:double_smelting`,
+`thaumic_reborn:double_blasting`, and `thaumic_reborn:knowledge_fragment`.
 
-Everything under `com.thaumicreborn.api.client` is client-only. The
-`example-addon` demonstrates a custom focus, weapon, revealing/runic helmet,
-and all three thaumic recipe formats while still bundling no API classes.
+See [ADDON_SETUP.md](ADDON_SETUP.md) for Gradle, `mods.toml`, lifecycle and JSON
+examples.
+
+## Compatibility
+
+2.0.0 is a major release. It changes `MOD_ID`, replaces the abbreviated research
+DTO with `ResearchDefinition`, and adds mandatory methods to `ApiServices` and
+several service interfaces. The corresponding main-mod bridge must be updated
+before the main mod embeds this API version.

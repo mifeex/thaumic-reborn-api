@@ -27,10 +27,52 @@ repositories {
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    testImplementation platform('org.junit:junit-bom:5.10.2')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
 }
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+}
+
+tasks.register('verifyApiSources') {
+    def checked = files('src', 'README.md', 'ADDON_SETUP.md', 'build.gradle',
+            'settings.gradle', 'gradle.properties')
+    inputs.files(checked)
+    doLast {
+        def forbidden = 'thaumcraft' + 'modern'
+        def offenders = fileTree(projectDir) {
+            include 'src/**', 'README.md', 'ADDON_SETUP.md', '*.gradle', 'gradle.properties'
+        }.files.findAll { it.isFile() && it.getText('UTF-8').contains(forbidden) }
+        if (!offenders.empty) {
+            throw new GradleException("obsolete mod id found in: ${offenders}")
+        }
+        if (file('src/main/resources/META-INF/mods.toml').exists()) {
+            throw new GradleException('the API library must not declare a Forge mod')
+        }
+    }
+}
+
+tasks.register('verifyApiJar') {
+    dependsOn tasks.named('jar')
+    doLast {
+        def artifact = tasks.named('jar').get().archiveFile.get().asFile
+        def tree = zipTree(artifact)
+        if (!tree.matching { include 'META-INF/mods.toml' }.isEmpty()) {
+            throw new GradleException('API JAR must not be a standalone Forge mod')
+        }
+        if (tree.matching { include 'com/thaumicreborn/api/**/*.class' }.isEmpty()) {
+            throw new GradleException('API JAR contains no public API classes')
+        }
+    }
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('verifyApiSources'), tasks.named('verifyApiJar')
 }
 
 publishing {

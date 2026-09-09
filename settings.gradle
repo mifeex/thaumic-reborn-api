@@ -13,5 +13,3 @@ plugins {
 }
 
 rootProject.name = 'thaumic-reborn-api'
-
-include 'example-addon'

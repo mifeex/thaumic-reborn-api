@@ -4,6 +4,8 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Map;
+import net.minecraft.server.level.ServerPlayer;
 
 /** Creation and inspection of data-driven casting tools. */
 public interface WandApi {
@@ -22,4 +24,10 @@ public interface WandApi {
     boolean isCraftingTool(ItemStack stack);
 
     boolean acceptsFocus(ItemStack stack);
+
+    int addCentivis(ItemStack stack, String primalAspect, int amount);
+
+    boolean canConsume(ServerPlayer player, ItemStack stack, Map<String, Integer> centivisCost);
+
+    boolean consume(ServerPlayer player, ItemStack stack, Map<String, Integer> centivisCost);
 }
