@@ -14,7 +14,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly fg.deobf('com.thaumicreborn:thaumic-reborn-api:2.0.1')
+    compileOnly fg.deobf('com.thaumicreborn:thaumic-reborn-api:2.0.2')
 }
 ```
 
@@ -113,6 +113,10 @@ Research categories live in `thaumcraft/categories`; constructions in
 `thaumcraft/essentia_transports`. Aspect, scan, crucible, infusion and wand
 formats are the formats parsed by the corresponding current reload listeners;
 unknown fields should not be used as an extension mechanism.
+
+У rod/cap в wand JSON поле `texture` принимает полный resource location файла,
+например `thaumictinkerer:textures/item/wand_rod_ichorcloth_model.png`. Это же
+значение доступно аддонам через `WandRod.texture()` и `WandCap.texture()`.
 
 Arcane recipes live in the normal `recipes` folder and use the new namespace:
 

@@ -6,6 +6,9 @@ import com.thaumicreborn.api.research.ResearchDefinition;
 import com.thaumicreborn.api.focus.FocusDefinition;
 import com.thaumicreborn.api.aura.AuraNode;
 import com.thaumicreborn.api.equipment.RaisedWaistArmor;
+import com.thaumicreborn.api.wand.WandCap;
+import com.thaumicreborn.api.wand.WandRod;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import org.junit.jupiter.api.Test;
 
@@ -22,8 +25,45 @@ import static org.junit.jupiter.api.Assertions.*;
 class ApiContractTest {
     @Test
     void versionAndModIdMatchTheMajorContract() {
-        assertEquals("2.0.1", ThaumicRebornApi.API_VERSION);
+        assertEquals("2.0.2", ThaumicRebornApi.API_VERSION);
         assertEquals("thaumic_reborn", ThaumicRebornApi.MOD_ID);
+    }
+
+    @Test
+    void wandComponentsExposeFullTextureLocationsAndRetainOldConstructors() {
+        ResourceLocation addonTexture = ResourceLocation.fromNamespaceAndPath(
+                "thaumictinkerer",
+                "textures/item/wand_rod_ichorcloth_model.png"
+        );
+        WandRod rod = new WandRod("ichorcloth", 100, "wand.rod.ichorcloth",
+                "rod_ichorcloth", List.of(), false, false, addonTexture);
+        WandCap cap = new WandCap("ichor", 0.8F, "wand.cap.ichor", "cap_ichor",
+                List.of(), 0.8F, ResourceLocation.fromNamespaceAndPath(
+                        "thaumictinkerer",
+                        "textures/item/wand_cap_ichor_model.png"
+                ));
+
+        assertEquals(addonTexture, rod.texture());
+        assertEquals("thaumictinkerer", cap.texture().getNamespace());
+        assertEquals(List.of("id", "capacityVis", "translationKey", "researchId",
+                "rechargeAspects", "staff", "runes", "texture"),
+                componentNames(WandRod.class));
+        assertEquals(List.of("id", "costModifier", "translationKey", "researchId",
+                "specialAspects", "specialCostModifier", "texture"),
+                componentNames(WandCap.class));
+
+        WandRod legacyRod = new WandRod("greatwood", 50, "wand.rod.greatwood",
+                "rod_greatwood", List.of(), false, false);
+        WandRod legacyStaff = new WandRod("codex_staff", 100, "wand.rod.codex_staff",
+                "rod_codex_staff", List.of(), true, true);
+        WandCap legacyCap = new WandCap("gold", 0.9F, "wand.cap.gold", "cap_gold",
+                List.of(), 0.9F);
+        assertEquals("thaumic_reborn:textures/item/wand_rod_greatwood_model.png",
+                legacyRod.texture().toString());
+        assertEquals("thaumic_reborn:textures/item/staff_rod_silverwood_model.png",
+                legacyStaff.texture().toString());
+        assertEquals("thaumic_reborn:textures/item/wand_cap_gold_model.png",
+                legacyCap.texture().toString());
     }
 
     @Test

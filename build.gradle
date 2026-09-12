@@ -88,6 +88,12 @@ tasks.register('verifyApiJar') {
         }.isEmpty()) {
             throw new GradleException('API JAR is missing RaisedWaistArmor')
         }
+        if (tree.matching {
+            include 'com/thaumicreborn/api/wand/WandRod.class'
+            include 'com/thaumicreborn/api/wand/WandCap.class'
+        }.files.size() != 2) {
+            throw new GradleException('API JAR is missing wand component definitions')
+        }
     }
 }
 
