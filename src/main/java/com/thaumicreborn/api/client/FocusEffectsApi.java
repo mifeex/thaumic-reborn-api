@@ -12,6 +12,17 @@ import java.util.Optional;
 public interface FocusEffectsApi {
     FocusEffectsApi EMPTY = new FocusEffectsApi() {};
 
+    /** Third-person arm pose for the actual caster; return through IClientItemExtensions.getArmPose.
+     * Empty when this hand is not actively using the supplied stack. The held-item
+     * layer owns item attachment: do not also apply first-person item rotations.
+     */
+    default Optional<net.minecraft.client.model.HumanoidModel.ArmPose> thirdPersonArmPose(
+            net.minecraft.world.entity.LivingEntity caster, InteractionHand hand,
+            net.minecraft.world.item.ItemStack stack) {
+        return Optional.empty();
+    }
+
+
     /**
      * Last rendered upper cap (or outer focus face) in world coordinates.
      * Empty for remote players, third person, stale frames, or an unrendered hand.

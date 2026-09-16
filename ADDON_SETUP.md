@@ -1,4 +1,4 @@
-# Подключение API 2.0 к аддону
+# Подключение API 2.0.5 к аддону
 
 ## Gradle и зависимость мода
 
@@ -14,7 +14,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly fg.deobf('com.thaumicreborn:thaumic-reborn-api:2.0.2')
+    compileOnly fg.deobf('com.thaumicreborn:thaumic-reborn-api:2.0.5')
 }
 ```
 
@@ -150,14 +150,14 @@ Arcane recipes live in the normal `recipes` folder and use the new namespace:
 ```
 
 
-## Focus effect origins (2.0.4)
+## Focus effect origins (2.0.5)
 
 Wand positioning and casting animation fixes are implemented by the main mod and
 apply to addon foci rendered on its wands. Left-arm draining mirrors the right-arm
 motion toward the crosshair, including when the player selects a left main arm.
 Use the shared wand display transforms: Minecraft already mirrors left-hand
 rotations, so do not pre-invert their Y/Z angles or mirror the returned effect
-origin again. This correction is supplied by the main mod; the 2.0.4 API
+origin again. This correction is supplied by the main mod; the 2.0.5 API
 signatures remain unchanged. Do not copy its renderer into an addon.
 On the client thread, use `ThaumicRebornClientApi.focusEffects()` for custom effects:
 
@@ -186,3 +186,22 @@ Vis network `available`, `consume` and `node().availableVis()` now observe every
 filter on a route. A downstream unfiltered relay cannot restore aspects removed
 by an upstream Aqua filter. For display colours, use the effective available
 supply rather than the root node's unfiltered pool.
+
+## Focus rejection (2.0.5)
+
+Override `FocusBehavior.canCast(context)` for target, permission and other
+preconditions. Keep it side-effect-free: the host calls it before charging vis
+and during continuous use. Return `FAIL` from `cast` or `false` from `tick`
+when an attempt cannot proceed. Continuous animation starts only after the
+first successful tick. The host stops failed use and plays `wandfail` at most
+once per 10 server ticks per player, shared across hands and focus types.
+Do not play a second failure sound in the addon. Existing implementations
+remain compatible through the default `canCast` method.
+
+## Third-person casting (2.0.5)
+
+Shared wand rendering animates the actual caster's arm and keeps the item fixed
+to its grip. First-person transforms are unchanged. Custom addon item extensions
+can return `ThaumicRebornClientApi.focusEffects().thirdPersonArmPose(entity, hand, stack).orElse(null)`
+from `getArmPose`. Use the rendered entity, not `Minecraft.player`. Do not also
+apply a first-person orbit to the held item in third person.

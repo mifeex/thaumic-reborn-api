@@ -1,7 +1,7 @@
 # Thaumic Reborn API
 
 Compile-time API for addons targeting Thaumic Reborn on Minecraft Forge 1.20.1.
-Version 2.0.2 follows the current `thaumic_reborn` mod and resource namespace.
+Version 2.0.5 follows the current `thaumic_reborn` mod and resource namespace.
 This artifact is a Java library, not a separately installed Forge mod.
 
 Addon developers must use the API as `compileOnly`. The main Thaumic Reborn JAR
@@ -60,11 +60,11 @@ examples.
 
 ## Compatibility
 
-2.0.2 exposes each wand rod and cap's full texture `ResourceLocation`. The
-2.0.1 constructors remain available and derive the built-in conventional
+2.0.5 exposes each wand rod and cap's full texture `ResourceLocation`. The
+Legacy constructors remain available and derive the built-in conventional
 `thaumic_reborn:textures/item/..._model.png` path.
 
-2.0.0 is a major release. It changes `MOD_ID`, replaces the abbreviated research
+The 2.0 API introduced breaking changes. It changes `MOD_ID`, replaces the abbreviated research
 DTO with `ResearchDefinition`, and adds mandatory methods to `ApiServices` and
 several service interfaces. The corresponding main-mod bridge must be updated
 before the main mod embeds this API version.

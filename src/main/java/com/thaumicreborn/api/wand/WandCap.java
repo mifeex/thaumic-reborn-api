@@ -22,7 +22,7 @@ public record WandCap(
     }
 
     /**
-     * Retains the 2.0.1 constructor and applies the main mod's conventional
+     * Retains the legacy constructor and applies the main mod's conventional
      * texture path. Data-driven components should use the canonical
      * constructor so addon namespaces and custom paths are preserved.
      */
