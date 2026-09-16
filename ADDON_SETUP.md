@@ -73,6 +73,24 @@ public final class AddonLeggingsItem extends ArmorItem
 что предмет надет именно в слот поножей, прежде чем скрыть конфликтующую поясную
 геометрию своего нагрудника.
 
+Анимация непрерывного фокуса задаётся в `FocusDefinition`. Старые конструкторы
+автоматически используют классическую `FocusAnimation.WAVE`. Для лучевого
+фокуса можно явно выбрать компактную позу зарядки:
+
+```java
+var definition = new FocusDefinition(
+        ResourceLocation.fromNamespaceAndPath("your_addon", "focus_beam"),
+        0x44AAFF,
+        true,
+        0,
+        Map.of("aer", 5),
+        FocusAnimation.CHARGE
+);
+ThaumicRebornApi.foci().register(definition, behavior);
+```
+
+Доступные варианты соответствуют TC4: `WAVE` и `CHARGE`.
+
 ## Пути и основные форматы datapack
 
 Папка `thaumcraft/` сохранена намеренно. Файл исследования, например,
@@ -130,3 +148,41 @@ Arcane recipes live in the normal `recipes` folder and use the new namespace:
   "result": {"item": "your_addon:example_item"}
 }
 ```
+
+
+## Focus effect origins (2.0.4)
+
+Wand positioning and casting animation fixes are implemented by the main mod and
+apply to addon foci rendered on its wands. Left-arm draining mirrors the right-arm
+motion toward the crosshair, including when the player selects a left main arm.
+Use the shared wand display transforms: Minecraft already mirrors left-hand
+rotations, so do not pre-invert their Y/Z angles or mirror the returned effect
+origin again. This correction is supplied by the main mod; the 2.0.4 API
+signatures remain unchanged. Do not copy its renderer into an addon.
+On the client thread, use `ThaumicRebornClientApi.focusEffects()` for custom effects:
+
+```java
+var effects = ThaumicRebornClientApi.focusEffects();
+// During world rendering: endpoint is local to the same pose used for your beam.
+var start = effects.renderedTip(player, hand, worldPose);
+if (start.isPresent()) {
+    // Draw your beam from start.get() with worldPose.
+}
+```
+
+An empty result means no valid first-person sample: skip that frame or use your
+own third-person attachment. Never substitute the local player's tip for another
+player. The overload without a pose returns world coordinates from the recent
+frame, suitable for a client particle launch. Both hands are supported.
+
+For addon projectiles, call `beginProjectileTick(projectile)` before the client
+movement tick and `projectileTrail(projectile, particle)` afterwards. Use
+`projectileOffset(projectile, partialTick)` in your entity renderer as well.
+These helpers only adjust visuals. Keep server spawn positions, collision and
+damage authoritative; never send a rendered tip to the server as a trusted hit.
+Use these helpers only from client-side code, not a dedicated-server initializer.
+
+Vis network `available`, `consume` and `node().availableVis()` now observe every
+filter on a route. A downstream unfiltered relay cannot restore aspects removed
+by an upstream Aqua filter. For display colours, use the effective available
+supply rather than the root node's unfiltered pool.

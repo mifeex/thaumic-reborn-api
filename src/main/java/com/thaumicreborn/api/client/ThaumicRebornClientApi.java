@@ -11,6 +11,7 @@ public final class ThaumicRebornClientApi {
     public static boolean isAvailable() { return services != null; }
     public static AspectRenderApi aspects() { return services().aspects(); }
     public static HudApi hud() { return services().hud(); }
+    public static FocusEffectsApi focusEffects() { return services().focusEffects(); }
 
     public static synchronized void install(ClientApiServices implementation) {
         Objects.requireNonNull(implementation, "implementation");

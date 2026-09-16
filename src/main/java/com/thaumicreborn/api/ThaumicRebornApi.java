@@ -27,7 +27,7 @@ import java.util.Objects;
  * classes are supplied by the main mod.</p>
  */
 public final class ThaumicRebornApi {
-    public static final String API_VERSION = "2.0.2";
+    public static final String API_VERSION = "2.0.4";
     public static final String MOD_ID = "thaumic_reborn";
 
     private static volatile ApiServices services;

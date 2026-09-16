@@ -4,7 +4,11 @@ import net.minecraft.core.BlockPos;
 import java.util.Map;
 import java.util.Objects;
 
-/** Immutable route-aware state for a relay, charger or energized source. */
+/**
+ * Immutable route-aware state for a relay, charger or energized source.
+ * availableVis includes upstream filters; attunement is only this node's local filter.
+ * An unfiltered descendant of an Aqua filter still exposes only Aqua supply.
+ */
 public record VisNetworkNode(BlockPos position, NodeKind kind, int attunement,
         BlockPos parent, BlockPos source, Map<String, Integer> availableVis) {
     public VisNetworkNode {

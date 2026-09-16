@@ -10,13 +10,31 @@ import java.util.Objects;
 public record FocusDefinition(ResourceLocation id, int color, boolean continuous,
                               int cooldownTicks, Map<String, Integer> centivisCost,
                               boolean perTickCost, int maximumRanks,
-                              Map<Integer, List<ResourceLocation>> upgradesByRank) {
+                              Map<Integer, List<ResourceLocation>> upgradesByRank,
+                              FocusAnimation animation) {
     public FocusDefinition(ResourceLocation id, int color, boolean continuous,
             int cooldownTicks, Map<String, Integer> centivisCost) {
-        this(id, color, continuous, cooldownTicks, centivisCost, continuous, 5, Map.of());
+        this(id, color, continuous, cooldownTicks, centivisCost, continuous,
+                5, Map.of(), FocusAnimation.WAVE);
+    }
+    /** Short constructor for addons that only need to select the casting pose. */
+    public FocusDefinition(ResourceLocation id, int color, boolean continuous,
+            int cooldownTicks, Map<String, Integer> centivisCost,
+            FocusAnimation animation) {
+        this(id, color, continuous, cooldownTicks, centivisCost, continuous,
+                5, Map.of(), animation);
+    }
+    /** Retains the pre-animation API constructor with the TC4 WAVE default. */
+    public FocusDefinition(ResourceLocation id, int color, boolean continuous,
+            int cooldownTicks, Map<String, Integer> centivisCost,
+            boolean perTickCost, int maximumRanks,
+            Map<Integer, List<ResourceLocation>> upgradesByRank) {
+        this(id, color, continuous, cooldownTicks, centivisCost, perTickCost,
+                maximumRanks, upgradesByRank, FocusAnimation.WAVE);
     }
     public FocusDefinition {
         Objects.requireNonNull(id, "id");
+        Objects.requireNonNull(animation, "animation");
         if (cooldownTicks < 0) throw new IllegalArgumentException("cooldownTicks must be >= 0");
         centivisCost = Map.copyOf(centivisCost);
         centivisCost.forEach((aspect, amount) -> {

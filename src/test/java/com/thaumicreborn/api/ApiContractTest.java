@@ -4,6 +4,7 @@ import com.thaumicreborn.api.knowledge.KnowledgeSnapshot;
 import com.thaumicreborn.api.knowledge.WarpType;
 import com.thaumicreborn.api.research.ResearchDefinition;
 import com.thaumicreborn.api.focus.FocusDefinition;
+import com.thaumicreborn.api.focus.FocusAnimation;
 import com.thaumicreborn.api.aura.AuraNode;
 import com.thaumicreborn.api.equipment.RaisedWaistArmor;
 import com.thaumicreborn.api.wand.WandCap;
@@ -25,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ApiContractTest {
     @Test
     void versionAndModIdMatchTheMajorContract() {
-        assertEquals("2.0.2", ThaumicRebornApi.API_VERSION);
+        assertEquals("2.0.4", ThaumicRebornApi.API_VERSION);
         assertEquals("thaumic_reborn", ThaumicRebornApi.MOD_ID);
     }
 
@@ -76,13 +77,31 @@ class ApiContractTest {
                 "x", "y", "pages", "completionWarp", "nodeFrame", "specialFrame",
                 "researchCost", "purchaseCost", "siblings"), names);
         assertEquals(List.of("id", "color", "continuous", "cooldownTicks",
-                "centivisCost", "perTickCost", "maximumRanks", "upgradesByRank"),
+                "centivisCost", "perTickCost", "maximumRanks", "upgradesByRank",
+                "animation"),
                 componentNames(FocusDefinition.class));
         assertEquals(List.of("id", "type", "modifier", "current", "maximum", "revision"),
                 componentNames(AuraNode.class));
         assertEquals(List.of("knownAspects", "aspectAmounts", "completedScans",
                 "revealedResearch", "completedResearch", "researchCriteria", "warp",
                 "warpCounter", "runicCharge"), componentNames(KnowledgeSnapshot.class));
+    }
+
+    @Test
+    void addonFocusAnimationDefaultsToWaveAndCanSelectCharge() {
+        ResourceLocation id = ResourceLocation.fromNamespaceAndPath(
+                "exampleaddon", "focus_beam"
+        );
+        FocusDefinition legacy = new FocusDefinition(
+                id, 0x44AAFF, true, 0, Map.of("aer", 5)
+        );
+        FocusDefinition charge = new FocusDefinition(
+                id, 0x44AAFF, true, 0, Map.of("aer", 5),
+                FocusAnimation.CHARGE
+        );
+
+        assertEquals(FocusAnimation.WAVE, legacy.animation());
+        assertEquals(FocusAnimation.CHARGE, charge.animation());
     }
 
     @Test

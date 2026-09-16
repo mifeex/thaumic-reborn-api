@@ -11,6 +11,9 @@ import java.util.function.Predicate;
 
 /** Read and server-authoritative mutation access for Thaumic Reborn aura nodes. */
 public interface AuraApi {
+    /** Register a loaded AuraNodeDevice block entity. Re-register after chunk load. */
+    default void registerDevice(ServerLevel level, BlockPos position) { }
+
     Optional<AuraNode> node(Level level, BlockPos position);
     List<LocatedAuraNode> withinCube(ServerLevel level, BlockPos origin, int radius);
     Optional<LocatedAuraNode> nearest(ServerLevel level, BlockPos origin, int radius,
