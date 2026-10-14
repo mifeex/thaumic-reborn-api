@@ -18,7 +18,7 @@ class AbstractFocusItemContractTest {
     }
 
     @Test void oldAddonItemsKeepDefaultDecorationWithoutRecompilation() {
-        FocusItem legacy = () -> new ResourceLocation("example", "focus");
+        FocusItem legacy = () -> ResourceLocation.fromNamespaceAndPath("example", "focus");
         assertSame(FocusDecoration.DEFAULT, legacy.decoration());
         assertNull(legacy.decoration().texture());
         assertEquals(0, legacy.decoration().heightOffset());
@@ -31,6 +31,6 @@ class AbstractFocusItemContractTest {
         assertThrows(IllegalArgumentException.class, () -> new FocusDecoration(null, 0, Float.POSITIVE_INFINITY, .05F));
         assertThrows(IllegalArgumentException.class, () -> new FocusDecoration(null, 0, 0, .05F));
         assertThrows(IllegalArgumentException.class, () -> new FocusDecoration(null, 0, 1, -.1F));
-        assertDoesNotThrow(() -> new FocusDecoration(new ResourceLocation("addon", "textures/custom.png"), -.125F, 1.35F, .1F));
+        assertDoesNotThrow(() -> new FocusDecoration(ResourceLocation.fromNamespaceAndPath("addon", "textures/custom.png"), -.125F, 1.35F, .1F));
     }
 }

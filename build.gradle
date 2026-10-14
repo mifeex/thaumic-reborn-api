@@ -1,24 +1,29 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
-    id 'net.minecraftforge.gradle' version '6.0.54'
+    id 'net.neoforged.moddev' version '2.0.148'
 }
 
 group = api_group
 version = api_version
 
 base {
-    archivesName = 'thaumic-reborn-api'
+    archivesName = 'thaumic-reborn-api-neoforge'
 }
 
 java {
-    toolchain.languageVersion = JavaLanguageVersion.of(17)
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
     withSourcesJar()
     withJavadocJar()
 }
 
-minecraft {
-    mappings channel: 'official', version: minecraft_version
+neoForge {
+    enable {
+        version = project.neo_version
+        disableRecompilation = true
+    }
+    // Contract tests use the same Minecraft/NeoForge dependencies as the library.
+    addModdingDependenciesTo sourceSets.test
 }
 
 repositories {
@@ -26,9 +31,9 @@ repositories {
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     testImplementation platform('org.junit:junit-bom:5.10.2')
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -51,8 +56,8 @@ tasks.register('verifyApiSources') {
         if (!offenders.empty) {
             throw new GradleException("obsolete mod id found in: ${offenders}")
         }
-        if (file('src/main/resources/META-INF/mods.toml').exists()) {
-            throw new GradleException('the API library must not declare a Forge mod')
+        if (!file('src/main/resources/META-INF/neoforge.mods.toml').isFile()) {
+            throw new GradleException('public API must declare its standalone NeoForge mod')
         }
         def raisedWaistSource = file(
                 'src/main/java/com/thaumicreborn/api/equipment/RaisedWaistArmor.java')
@@ -77,8 +82,9 @@ tasks.register('verifyApiJar') {
     doLast {
         def artifact = tasks.named('jar').get().archiveFile.get().asFile
         def tree = zipTree(artifact)
-        if (!tree.matching { include 'META-INF/mods.toml' }.isEmpty()) {
-            throw new GradleException('API JAR must not be a standalone Forge mod')
+        if (tree.matching { include 'META-INF/neoforge.mods.toml' }.isEmpty()
+                || tree.matching { include 'com/thaumicreborn/apimod/ThaumicRebornApiMod.class' }.isEmpty()) {
+            throw new GradleException('API JAR is missing its loader identity')
         }
         if (tree.matching { include 'com/thaumicreborn/api/**/*.class' }.isEmpty()) {
             throw new GradleException('API JAR contains no public API classes')
@@ -105,6 +111,7 @@ publishing {
     publications {
         register('mavenJava', MavenPublication) {
             from components.java
+            artifactId = 'thaumic-reborn-api-neoforge'
         }
     }
     repositories {
@@ -112,5 +119,12 @@ publishing {
             name = 'localApiRepository'
             url = layout.buildDirectory.dir('repository')
         }
+    }
+}
+
+tasks.named('processResources') {
+    inputs.property('api_version', project.version.toString())
+    filesMatching('META-INF/neoforge.mods.toml') {
+        expand(api_version: project.version.toString())
     }
 }

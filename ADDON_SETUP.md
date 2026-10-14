@@ -1,38 +1,36 @@
-# Подключение API 2.0.5 к аддону
+# Подключение API 2.0.6-neoforge к аддону
 
 ## Gradle и зависимость мода
 
-API нужен только для компиляции:
+Цель: Minecraft 1.21.1, NeoForge 21.1.259, Java 21. Версия основного NF-мода
+ещё не опубликована; диапазон ниже — пример для будущего порта 2.9.x.
+Сначала соберите API командой `./gradlew build` и скопируйте JAR из `build/libs`.
+
+Для сборки аддона API подключается через compileOnly; для запуска его отдельный JAR обязателен:
 
 ```groovy
-repositories {
-    ivy {
-        url = uri('https://github.com/mifeex/thaumic-reborn-api/releases/download')
-        patternLayout { artifact 'v[revision]/[artifact]-[revision](-[classifier]).[ext]' }
-        metadataSources { artifact() }
-    }
-}
-
 dependencies {
-    compileOnly fg.deobf('com.thaumicreborn:thaumic-reborn-api:2.0.5')
+    compileOnly files('libs/thaumic-reborn-api-neoforge-2.0.6-neoforge.jar')
 }
 ```
 
 Не используйте `implementation`, Shadow, JarJar или распаковку API JAR. В
 готовом аддоне не должно быть `com/thaumicreborn/api/**`.
 
-В `META-INF/mods.toml` объявляется обязательная зависимость от основного мода:
+В `META-INF/neoforge.mods.toml` объявляется обязательная зависимость от основного мода:
 
 ```toml
 [[dependencies.your_addon]]
 modId="thaumic_reborn"
-mandatory=true
-versionRange="[1.9.3,2)"
+type="required"
+versionRange="[2.9,3)"
 ordering="AFTER"
 side="BOTH"
 ```
 
-Отдельный API JAR в папку `mods` не кладут. Java-регистрации выполняйте после
+Отдельный API JAR обязательно кладут в папку `mods` вместе с основным модом.
+Аддоны также должны объявлять обязательную зависимость `thaumic_reborn_api`
+с диапазоном `[2.0.6-neoforge,)`. Java-регистрации выполняйте после
 установки bridge основным модом (обычно common setup/enqueueWork). Datapack
 определения не требуют Java-регистрации.
 
@@ -93,8 +91,8 @@ ThaumicRebornApi.foci().register(definition, behavior);
 
 ## Пути и основные форматы datapack
 
-Папка `thaumcraft/` сохранена намеренно. Файл исследования, например,
-располагается в `data/your_addon/thaumcraft/research/example.json`:
+Папка `arcana/` соответствует перенесённым данным основного мода. Файл исследования, например,
+располагается в `data/your_addon/arcana/research/example.json`:
 
 ```json
 {
@@ -126,9 +124,9 @@ accept `minimum`, and `warp` accepts `measure`. Page types: `text`,
 `recipe` or `recipes`; `requires_research` gates an individual page. Infusion
 pages also carry their presentation-only `infusion` object.
 
-Research categories live in `thaumcraft/categories`; constructions in
-`thaumcraft/constructions`; generic block transport declarations in
-`thaumcraft/essentia_transports`. Aspect, scan, crucible, infusion and wand
+Research categories live in `arcana/categories`; constructions in
+`arcana/constructions`; generic block transport declarations in
+`arcana/essentia_transports`. Aspect, scan, crucible, infusion and wand
 formats are the formats parsed by the corresponding current reload listeners;
 unknown fields should not be used as an extension mechanism.
 
@@ -150,14 +148,14 @@ Arcane recipes live in the normal `recipes` folder and use the new namespace:
 ```
 
 
-## Focus effect origins (2.0.5)
+## Focus effect origins (2.0.6-neoforge)
 
 Wand positioning and casting animation fixes are implemented by the main mod and
 apply to addon foci rendered on its wands. Left-arm draining mirrors the right-arm
 motion toward the crosshair, including when the player selects a left main arm.
 Use the shared wand display transforms: Minecraft already mirrors left-hand
 rotations, so do not pre-invert their Y/Z angles or mirror the returned effect
-origin again. This correction is supplied by the main mod; the 2.0.5 API
+origin again. This correction is supplied by the main mod; the 2.0.6-neoforge API
 signatures remain unchanged. Do not copy its renderer into an addon.
 On the client thread, use `ThaumicRebornClientApi.focusEffects()` for custom effects:
 
@@ -187,7 +185,7 @@ filter on a route. A downstream unfiltered relay cannot restore aspects removed
 by an upstream Aqua filter. For display colours, use the effective available
 supply rather than the root node's unfiltered pool.
 
-## Focus rejection (2.0.5)
+## Focus rejection (2.0.6-neoforge)
 
 Override `FocusBehavior.canCast(context)` for target, permission and other
 preconditions. Keep it side-effect-free: the host calls it before charging vis
@@ -198,7 +196,7 @@ once per 10 server ticks per player, shared across hands and focus types.
 Do not play a second failure sound in the addon. Existing implementations
 remain compatible through the default `canCast` method.
 
-## Third-person casting (2.0.5)
+## Third-person casting (2.0.6-neoforge)
 
 Shared wand rendering animates the actual caster's arm and keeps the item fixed
 to its grip. First-person transforms are unchanged. Custom addon item extensions
@@ -224,9 +222,9 @@ this uses the item's definition rather than a second copy of its settings.
 public final class ExampleFocusItem extends AbstractFocusItem {
     public ExampleFocusItem(Properties properties) {
         super(properties,
-            new FocusDefinition(new ResourceLocation("example", "example"),
+            new FocusDefinition(ResourceLocation.fromNamespaceAndPath("example", "example"),
                 0x00CED1, false, 5, Map.of("aer", 25)),
-            new FocusDecoration(new ResourceLocation("example", "textures/item/custom_orn.png"),
+            new FocusDecoration(ResourceLocation.fromNamespaceAndPath("example", "textures/item/custom_orn.png"),
                 1F / 16F, 1.2F, .05F));
     }
 }

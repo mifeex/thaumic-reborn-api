@@ -1,0 +1,20 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="All Rights Reserved"
+[[mods]]
+modId="thaumic_reborn_api"
+version="${api_version}"
+displayName="Thaumic Reborn API"
+description="Public API required by Thaumic Reborn and its addons."
+[[dependencies.thaumic_reborn_api]]
+modId="neoforge"
+type="required"
+versionRange="[21.1.259,21.2)"
+ordering="NONE"
+side="BOTH"
+[[dependencies.thaumic_reborn_api]]
+modId="minecraft"
+type="required"
+versionRange="[1.21.1,1.21.2)"
+ordering="NONE"
+side="BOTH"

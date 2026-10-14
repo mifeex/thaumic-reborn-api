@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ApiContractTest {
     @Test
     void versionAndModIdMatchTheMajorContract() {
-        assertEquals("2.0.5", ThaumicRebornApi.API_VERSION);
+        assertEquals("2.0.6-neoforge-SNAPSHOT", ThaumicRebornApi.API_VERSION);
         assertEquals("thaumic_reborn", ThaumicRebornApi.MOD_ID);
     }
 
@@ -127,7 +127,7 @@ class ApiContractTest {
         assertTrue(docs.contains("thaumic_reborn:arcane_shaped"));
         assertFalse(docs.contains("thaumcraft" + "modern"));
         assertEquals("thaumic_reborn:arcane_shaped", DatapackPaths.ARCANE_SHAPED.toString());
-        assertEquals("thaumcraft/research", DatapackPaths.RESEARCH);
+        assertEquals("arcana/research", DatapackPaths.RESEARCH);
     }
 
     @Test

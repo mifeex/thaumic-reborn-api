@@ -1,12 +1,12 @@
 # Thaumic Reborn API
 
-Compile-time API for addons targeting Thaumic Reborn on Minecraft Forge 1.20.1.
-Version 2.0.5 follows the current `thaumic_reborn` mod and resource namespace.
-This artifact is a Java library, not a separately installed Forge mod.
+Compile-time API for addons targeting Thaumic Reborn on Minecraft 1.21.1 / NeoForge.
+Version 2.0.6-neoforge follows the current `thaumic_reborn` mod and resource namespace.
+This artifact is a separately installed NeoForge mod (`thaumic_reborn_api`).
 
-Addon developers must use the API as `compileOnly`. The main Thaumic Reborn JAR
-supplies these exact classes at runtime, so players install only the main mod and
-their addons. Never shade, JarJar, unpack, or otherwise copy the API classes into
+Addon developers must use the API as `compileOnly`. The public API JAR supplies these classes at runtime. Players must install
+both the main mod and the API JAR, plus their addons. NeoForge rejects the main
+mod at startup when the API is missing. Never shade, JarJar, unpack, or otherwise copy the API classes into
 an addon.
 
 ## Surface
@@ -36,31 +36,31 @@ no renderer or other client-only types.
 
 ## Datapacks
 
-The current reload listeners intentionally retain the historical `thaumcraft/`
-folder beneath each namespace. Addon definitions are loaded from:
+The NeoForge port uses the `arcana/` folder beneath each namespace, matching
+the migrated main-mod data. The main-mod loaders must consume:
 
-- `data/<addonid>/thaumcraft/aspects/*.json`
-- `data/<addonid>/thaumcraft/categories/*.json`
-- `data/<addonid>/thaumcraft/research/*.json`
-- `data/<addonid>/thaumcraft/scans/*.json`
-- `data/<addonid>/thaumcraft/crucible_recipes/*.json`
-- `data/<addonid>/thaumcraft/infusion_recipes/*.json`
-- `data/<addonid>/thaumcraft/wands/*.json`
-- `data/<addonid>/thaumcraft/constructions/*.json`
-- `data/<addonid>/thaumcraft/essentia_transports/*.json`
+- `data/<addonid>/arcana/aspects/*.json`
+- `data/<addonid>/arcana/categories/*.json`
+- `data/<addonid>/arcana/research/*.json`
+- `data/<addonid>/arcana/scans/*.json`
+- `data/<addonid>/arcana/crucible_recipes/*.json`
+- `data/<addonid>/arcana/infusion_recipes/*.json`
+- `data/<addonid>/arcana/wands/*.json`
+- `data/<addonid>/arcana/constructions/*.json`
+- `data/<addonid>/arcana/essentia_transports/*.json`
 
-Ordinary recipe-manager files remain in `data/<addonid>/recipes/*.json`.
+Ordinary recipe-manager files remain in `data/<addonid>/recipe/*.json`.
 Thaumic recipe serializer IDs are `thaumic_reborn:arcane_shaped`,
 `thaumic_reborn:arcane_shapeless`, `thaumic_reborn:arcane_wand_assembly`,
 `thaumic_reborn:arcane_sceptre_assembly`, `thaumic_reborn:double_smelting`,
-`thaumic_reborn:double_blasting`, and `thaumic_reborn:knowledge_fragment`.
+`thaumic_reborn:double_blasting`, and `thaumic_reborn:knowledge_fragment_research`.
 
-See [ADDON_SETUP.md](ADDON_SETUP.md) for Gradle, `mods.toml`, lifecycle and JSON
+See [ADDON_SETUP.md](ADDON_SETUP.md) for Gradle, `neoforge.mods.toml`, lifecycle and JSON
 examples.
 
 ## Compatibility
 
-2.0.5 exposes each wand rod and cap's full texture `ResourceLocation`. The
+2.0.6-neoforge exposes each wand rod and cap's full texture `ResourceLocation`. The
 Legacy constructors remain available and derive the built-in conventional
 `thaumic_reborn:textures/item/..._model.png` path.
 
@@ -68,3 +68,15 @@ The 2.0 API introduced breaking changes. It changes `MOD_ID`, replaces the abbre
 DTO with `ResearchDefinition`, and adds mandatory methods to `ApiServices` and
 several service interfaces. The corresponding main-mod bridge must be updated
 before the main mod embeds this API version.
+
+## Building the NeoForge API
+
+Run `./gradlew build --no-daemon --max-workers=1 --console=plain`.
+Gradle provisions Java 21 through the configured toolchain resolver.
+The artifact is `build/libs/thaumic-reborn-api-neoforge-2.0.6-neoforge.jar`.
+The NeoForge artifact has separate Maven coordinates from the Forge API.
+This does not make Forge 1.20.1 addon binaries compatible: rebuild and port addons.
+The main NeoForge mod must embed the API classes in its own mod output and bind
+its ApiServices/ClientApiServices implementations. It is not implemented here.
+The main-mod development source set must also include those classes; a plain
+parent-layer library dependency is insufficient for API classes extending Item.
