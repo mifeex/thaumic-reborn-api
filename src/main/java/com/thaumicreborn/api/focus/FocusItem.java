@@ -2,7 +2,10 @@ package com.thaumicreborn.api.focus;
 
 import net.minecraft.resources.ResourceLocation;
 
-/** Implement on an addon Item to make it equipable in Thaumic Reborn wands. */
+/** Compatibility contract for equippable foci. New items should extend AbstractFocusItem. */
 public interface FocusItem {
     ResourceLocation focusId();
+
+    /** Legacy items retain automatic ornament discovery and the original transform. */
+    default FocusDecoration decoration() { return FocusDecoration.DEFAULT; }
 }

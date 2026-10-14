@@ -205,3 +205,39 @@ to its grip. First-person transforms are unchanged. Custom addon item extensions
 can return `ThaumicRebornClientApi.focusEffects().thirdPersonArmPose(entity, hand, stack).orElse(null)`
 from `getArmPose`. Use the rendered entity, not `Minecraft.player`. Do not also
 apply a first-person orbit to the held item in third person.
+
+The host registers its casting ArmPose during item client initialization, before
+Minecraft builds model enum switch tables. The API lookup only returns that
+registered pose; it must never create an ArmPose during rendering. Custom addon
+poses must likewise be registered before rendering begins.
+
+## Shared focus item base (2.0.6-SNAPSHOT)
+
+New focus items extend `com.thaumicreborn.api.focus.AbstractFocusItem`.
+Give each focus type its own subclass. The base owns an immutable `FocusDefinition`
+(id, color, cast mode, cooldown, centi-vis costs, ranks, upgrades, casting animation)
+and `FocusDecoration`. It also enforces a stack size of one.
+Register `ThaumicRebornApi.foci().register(item, behavior)` after item registration;
+this uses the item's definition rather than a second copy of its settings.
+
+```java
+public final class ExampleFocusItem extends AbstractFocusItem {
+    public ExampleFocusItem(Properties properties) {
+        super(properties,
+            new FocusDefinition(new ResourceLocation("example", "example"),
+                0x00CED1, false, 5, Map.of("aer", 25)),
+            new FocusDecoration(new ResourceLocation("example", "textures/item/custom_orn.png"),
+                1F / 16F, 1.2F, .05F));
+    }
+}
+```
+
+Decoration height is measured in local block units, positive toward the tip.
+Width scales both horizontal axes, and extrusion depth uses unscaled sprite units.
+Texture alpha determines the ornament contour. A null texture retains conventional
+`textures/item/focus_<focus-id>_orn.png` discovery in the focus's namespace.
+The older `FocusItem` interface and definition-based registration remain supported;
+existing addons receive the default decoration transform.
+
+The local snapshot is bundled by the core mod; addons compile against it without
+bundling API classes. Build the core with this API before running migrated addons.

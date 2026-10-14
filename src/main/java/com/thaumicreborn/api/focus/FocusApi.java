@@ -10,6 +10,11 @@ import java.util.Optional;
 
 public interface FocusApi {
     void register(FocusDefinition definition, FocusBehavior behavior);
+
+    /** Register the same settings owned by the item, without duplicating casting metadata. */
+    default void register(AbstractFocusItem item, FocusBehavior behavior) {
+        register(item.definition(), behavior);
+    }
     Optional<FocusDefinition> find(ResourceLocation id);
     List<FocusDefinition> all();
     Optional<FocusUpgradeDefinition> upgrade(ResourceLocation id);
