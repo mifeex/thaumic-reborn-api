@@ -68,3 +68,35 @@ The 2.0 API introduced breaking changes. It changes `MOD_ID`, replaces the abbre
 DTO with `ResearchDefinition`, and adds mandatory methods to `ApiServices` and
 several service interfaces. The corresponding main-mod bridge must be updated
 before the main mod embeds this API version.
+
+## Custom focus upgrades (2.0.7)
+
+During common setup, before worlds/menus load, register the same immutable
+metadata on client and server:
+
+```java
+ResourceLocation slow = ResourceLocation.fromNamespaceAndPath("example", "slow");
+ThaumicRebornApi.foci().registerUpgrade(new FocusUpgradeDefinition(
+    slow, -1,
+    ResourceLocation.fromNamespaceAndPath("example", "textures/foci/slow.png"),
+    "focus.example.slow.name", "focus.example.slow.description",
+    Map.of("vinculum", 8)));
+```
+
+Declare this ID in the focus's `upgradesByRank`, then read its level from
+`foci().state(focus).levels()`. The provider supplies the native manipulator UI,
+rank validation, XP and primal network payment. Addons implement the actual
+custom effect. Custom identities are namespaced, with `legacyId=-1`; duplicate
+IDs and the provider namespace are reserved/rejected. Numeric native upgrade NBT
+remains compatible, while custom/active-process saves use stable namespaced keys.
+
+`AspectApi.createEssentiaCrystal`, `AlchemyApi.nativeCluster` and
+`AlchemyApi.smeltingBonus` return native stacks without requiring provider NBT.
+Empty means unsupported. `FocusBehavior.paysOwnVis()` defaults false; override it
+only for a single cast that pays a dynamic cost with `foci().consumeVis` after
+permission checks and before its effects. The provider then skips its automatic
+single-cast debit; Frugal still applies inside `consumeVis`.
+
+Use the rebuilt matching provider: older providers may expose default unsupported
+or empty implementations for the newly added optional methods. Addons must not
+bundle a second copy of the API.

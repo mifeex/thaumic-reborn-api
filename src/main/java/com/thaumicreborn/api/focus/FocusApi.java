@@ -15,6 +15,11 @@ public interface FocusApi {
     default void register(AbstractFocusItem item, FocusBehavior behavior) {
         register(item.definition(), behavior);
     }
+    /** Register an immutable namespaced upgrade. Providers reject duplicate/reserved identities.
+     * Custom definitions use legacyId=-1; identity never depends on registration order. */
+    default void registerUpgrade(FocusUpgradeDefinition definition) {
+        throw new UnsupportedOperationException("This provider does not support custom focus upgrades");
+    }
     Optional<FocusDefinition> find(ResourceLocation id);
     List<FocusDefinition> all();
     Optional<FocusUpgradeDefinition> upgrade(ResourceLocation id);
