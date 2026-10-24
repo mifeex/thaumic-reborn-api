@@ -13,6 +13,8 @@ public interface AspectApi {
     List<Aspect> all();
 
     Map<String, Integer> aspects(ItemStack stack);
+    /** Native essentia crystal with one validated aspect unit. */
+    default ItemStack createEssentiaCrystal(String aspect) { return ItemStack.EMPTY; }
 
     /** Stored payload only, excluding the item's inherent Auram scan aspects. */
     default Optional<String> etherealEssenceAspect(ItemStack stack) { return Optional.empty(); }

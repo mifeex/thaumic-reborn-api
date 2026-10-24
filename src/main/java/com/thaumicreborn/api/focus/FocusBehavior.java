@@ -4,6 +4,8 @@ import net.minecraft.world.InteractionResult;
 
 /** Server-side extension point for custom focus casting. */
 public interface FocusBehavior {
+    /** Opt out only when the behavior atomically pays its dynamic cost itself. */
+    default boolean paysOwnVis() { return false; }
     /**
      * Side-effect-free server validation before payment and animation, also checked
      * during continuous use. False rejects the attempt with rate-limited wandfail.

@@ -1,4 +1,4 @@
-# Подключение API 2.0.6-neoforge к аддону
+# Подключение API 2.0.7-neoforge к аддону
 
 ## Gradle и зависимость мода
 
@@ -10,7 +10,7 @@
 
 ```groovy
 dependencies {
-    compileOnly files('libs/thaumic-reborn-api-neoforge-2.0.6-neoforge.jar')
+    compileOnly files('libs/thaumic-reborn-api-neoforge-2.0.7-neoforge.jar')
 }
 ```
 
@@ -30,7 +30,7 @@ side="BOTH"
 
 Отдельный API JAR обязательно кладут в папку `mods` вместе с основным модом.
 Аддоны также должны объявлять обязательную зависимость `thaumic_reborn_api`
-с диапазоном `[2.0.6-neoforge,)`. Java-регистрации выполняйте после
+с диапазоном `[2.0.7-neoforge,)`. Java-регистрации выполняйте после
 установки bridge основным модом (обычно common setup/enqueueWork). Datapack
 определения не требуют Java-регистрации.
 
@@ -148,14 +148,14 @@ Arcane recipes live in the normal `recipes` folder and use the new namespace:
 ```
 
 
-## Focus effect origins (2.0.6-neoforge)
+## Focus effect origins (2.0.7-neoforge)
 
 Wand positioning and casting animation fixes are implemented by the main mod and
 apply to addon foci rendered on its wands. Left-arm draining mirrors the right-arm
 motion toward the crosshair, including when the player selects a left main arm.
 Use the shared wand display transforms: Minecraft already mirrors left-hand
 rotations, so do not pre-invert their Y/Z angles or mirror the returned effect
-origin again. This correction is supplied by the main mod; the 2.0.6-neoforge API
+origin again. This correction is supplied by the main mod; the 2.0.7-neoforge API
 signatures remain unchanged. Do not copy its renderer into an addon.
 On the client thread, use `ThaumicRebornClientApi.focusEffects()` for custom effects:
 
@@ -185,7 +185,7 @@ filter on a route. A downstream unfiltered relay cannot restore aspects removed
 by an upstream Aqua filter. For display colours, use the effective available
 supply rather than the root node's unfiltered pool.
 
-## Focus rejection (2.0.6-neoforge)
+## Focus rejection (2.0.7-neoforge)
 
 Override `FocusBehavior.canCast(context)` for target, permission and other
 preconditions. Keep it side-effect-free: the host calls it before charging vis
@@ -196,7 +196,7 @@ once per 10 server ticks per player, shared across hands and focus types.
 Do not play a second failure sound in the addon. Existing implementations
 remain compatible through the default `canCast` method.
 
-## Third-person casting (2.0.6-neoforge)
+## Third-person casting (2.0.7-neoforge)
 
 Shared wand rendering animates the actual caster's arm and keeps the item fixed
 to its grip. First-person transforms are unchanged. Custom addon item extensions
@@ -239,3 +239,17 @@ existing addons receive the default decoration transform.
 
 The local snapshot is bundled by the core mod; addons compile against it without
 bundling API classes. Build the core with this API before running migrated addons.
+
+## Именные улучшения и оплата Vis (2.0.7-neoforge)
+
+Регистрируйте улучшение через `ThaumicRebornApi.foci().registerUpgrade` с ID
+своего namespace и `legacyId=-1`. Добавьте этот ID в разрешённые ранги своего
+`FocusDefinition`. Стол проверяет ранги, а сохранение хранит именной ключ,
+не зависящий от порядка регистрации. Неизвестные ключи старых аддонов
+сохраняются и продолжают занимать свои слоты.
+
+По умолчанию `FocusBehavior.paysOwnVis()` возвращает false: мод оплачивает
+обычный каст автоматически. Возвращайте true только если сам обработчик после
+проверки разрешений и до изменения мира вызывает `FocusApi.consumeVis` для
+своей динамической стоимости и прекращает каст при неудаче. Это исключает
+двойное списание. Скидка Frugal учитывается и для аддонного набалдашника.

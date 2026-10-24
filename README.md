@@ -1,7 +1,7 @@
 # Thaumic Reborn API
 
 Compile-time API for addons targeting Thaumic Reborn on Minecraft 1.21.1 / NeoForge.
-Version 2.0.6-neoforge follows the current `thaumic_reborn` mod and resource namespace.
+Version 2.0.7-neoforge follows the current `thaumic_reborn` mod and resource namespace.
 This artifact is a separately installed NeoForge mod (`thaumic_reborn_api`).
 
 Addon developers must use the API as `compileOnly`. The public API JAR supplies these classes at runtime. Players must install
@@ -60,7 +60,7 @@ examples.
 
 ## Compatibility
 
-2.0.6-neoforge exposes each wand rod and cap's full texture `ResourceLocation`. The
+2.0.7-neoforge exposes each wand rod and cap's full texture `ResourceLocation`. The
 Legacy constructors remain available and derive the built-in conventional
 `thaumic_reborn:textures/item/..._model.png` path.
 
@@ -73,10 +73,21 @@ before the main mod embeds this API version.
 
 Run `./gradlew build --no-daemon --max-workers=1 --console=plain`.
 Gradle provisions Java 21 through the configured toolchain resolver.
-The artifact is `build/libs/thaumic-reborn-api-neoforge-2.0.6-neoforge.jar`.
+The artifact is `build/libs/thaumic-reborn-api-neoforge-2.0.7-neoforge.jar`.
 The NeoForge artifact has separate Maven coordinates from the Forge API.
 This does not make Forge 1.20.1 addon binaries compatible: rebuild and port addons.
-The main NeoForge mod must embed the API classes in its own mod output and bind
-its ApiServices/ClientApiServices implementations. It is not implemented here.
-The main-mod development source set must also include those classes; a plain
-parent-layer library dependency is insufficient for API classes extending Item.
+The API is a standalone NeoForge mod with identity `thaumic_reborn_api`.
+The main mod bundles this complete JAR through Jar-in-Jar and binds its
+ApiServices/ClientApiServices implementations. Do not copy duplicate API classes
+into the main mod or an addon. Development runs must load the API as a mod too.
+
+## Additions in 2.0.7-neoforge
+
+`FocusApi.registerUpgrade` registers immutable namespaced custom upgrades with
+`legacyId=-1`. The host protects native names and rejects duplicates. Custom
+upgrade keys are saved independently of transient menu ordinals.
+`FocusBehavior.paysOwnVis()` defaults to false, preserving automatic payment for
+old addons. Override it only when a behavior checks permissions and atomically
+pays its dynamic cost using `FocusApi.consumeVis` before committing effects.
+The host applies Frugal discounts to addon costs. The release also exposes
+native essentia-crystal creation and Infernal Furnace/ore-cluster helpers.

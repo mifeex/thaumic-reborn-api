@@ -15,6 +15,10 @@ public interface FocusApi {
     default void register(AbstractFocusItem item, FocusBehavior behavior) {
         register(item.definition(), behavior);
     }
+    /** Register a namespaced custom upgrade with legacyId=-1. */
+    default void registerUpgrade(FocusUpgradeDefinition definition) {
+        throw new UnsupportedOperationException("This provider does not support custom focus upgrades");
+    }
     Optional<FocusDefinition> find(ResourceLocation id);
     List<FocusDefinition> all();
     Optional<FocusUpgradeDefinition> upgrade(ResourceLocation id);
