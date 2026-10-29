@@ -1,16 +1,17 @@
-# Подключение API 2.0.7-neoforge к аддону
+# Подключение API 2.0.9-neoforge к аддону
 
 ## Gradle и зависимость мода
 
 Цель: Minecraft 1.21.1, NeoForge 21.1.259, Java 21. Версия основного NF-мода
-ещё не опубликована; диапазон ниже — пример для будущего порта 2.9.x.
+для этих расширений должна быть собрана с API 2.0.9-neoforge. Диапазон
+зависимости ниже соответствует текущей ветке NF 1.1.x.
 Сначала соберите API командой `./gradlew build` и скопируйте JAR из `build/libs`.
 
 Для сборки аддона API подключается через compileOnly; для запуска его отдельный JAR обязателен:
 
 ```groovy
 dependencies {
-    compileOnly files('libs/thaumic-reborn-api-neoforge-2.0.7-neoforge.jar')
+    compileOnly files('libs/thaumic-reborn-api-neoforge-2.0.9-neoforge.jar')
 }
 ```
 
@@ -23,16 +24,19 @@ dependencies {
 [[dependencies.your_addon]]
 modId="thaumic_reborn"
 type="required"
-versionRange="[2.9,3)"
+versionRange="[1.1.3,2)"
 ordering="AFTER"
 side="BOTH"
 ```
 
 Отдельный API JAR обязательно кладут в папку `mods` вместе с основным модом.
 Аддоны также должны объявлять обязательную зависимость `thaumic_reborn_api`
-с диапазоном `[2.0.7-neoforge,)`. Java-регистрации выполняйте после
+с диапазоном `[2.0.9-neoforge,)`. Java-регистрации выполняйте после
 установки bridge основным модом (обычно common setup/enqueueWork). Datapack
 определения не требуют Java-регистрации.
+
+Создание узлов ауры и расширение скверны через `ThaumicRebornApi.taint()`
+описаны в [README.md](README.md#extending-taint-209-neoforge).
 
 ## Java
 
