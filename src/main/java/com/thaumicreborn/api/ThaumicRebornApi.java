@@ -27,7 +27,7 @@ import java.util.Objects;
  * classes are supplied by the main mod.</p>
  */
 public final class ThaumicRebornApi {
-    public static final String API_VERSION = "2.0.7";
+    public static final String API_VERSION = "2.0.9";
     public static final String MOD_ID = "thaumic_reborn";
 
     private static volatile ApiServices services;
@@ -82,6 +82,7 @@ public final class ThaumicRebornApi {
     public static VisNetworkApi visNetwork() { return services().visNetwork(); }
     public static GolemApi golems() { return services().golems(); }
     public static WorldApi world() { return services().world(); }
+    public static com.thaumicreborn.api.world.TaintApi taint() { return world().taint(); }
     public static ConstructionApi constructions() { return services().constructions(); }
     public static LinkApi links() { return services().links(); }
     public static DeviceApi devices() { return services().devices(); }

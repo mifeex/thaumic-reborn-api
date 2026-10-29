@@ -4,6 +4,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 /** Queries and bounded transformations for public thaumic world state. */
 public interface WorldApi {
+    default TaintApi taint() { return TaintApi.UNSUPPORTED; }
     ResourceLocation magicalForestBiome();
     ResourceLocation taintedLandsBiome();
     ResourceLocation outerLandsDimension();

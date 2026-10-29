@@ -1,7 +1,7 @@
 # Thaumic Reborn API
 
 Compile-time API for addons targeting Thaumic Reborn on Minecraft Forge 1.20.1.
-Version 2.0.5 follows the current `thaumic_reborn` mod and resource namespace.
+Version 2.0.9 follows the current `thaumic_reborn` mod and resource namespace.
 This artifact is a Java library, not a separately installed Forge mod.
 
 Addon developers must use the API as `compileOnly`. The main Thaumic Reborn JAR
@@ -18,7 +18,8 @@ an addon.
   reveal, availability, note, reconcile and purchase operations;
 - player aspect knowledge, criteria, research state, warp counters and runic state;
 - wand components/vis, focus behavior, five-rank upgrades and 18-slot pouches;
-- aura-node snapshots, spatial queries and revision-aware mutations;
+- aura-node creation, snapshots, spatial queries and revision-aware mutations;
+- tainted mobs, infection/conversion, passive spread sources and block conversion rules;
 - vis-network routes, attunements, availability and machine consumption;
 - golem configuration, constructions, mirrors, node jars, taint/biomes/Outer Lands,
   item decomposition and stable alchemical/device snapshots;
@@ -68,6 +69,117 @@ The 2.0 API introduced breaking changes. It changes `MOD_ID`, replaces the abbre
 DTO with `ResearchDefinition`, and adds mandatory methods to `ApiServices` and
 several service interfaces. The corresponding main-mod bridge must be updated
 before the main mod embeds this API version.
+
+## Extending taint (2.0.9)
+
+Use `ThaumicRebornApi.taint()` (also available as `world().taint()`). The API
+integrates addon content with the main mod's live ecology and Flux Taint deaths.
+Entity types, attributes, renderers, spawn eggs and natural-spawn rules are still
+registered by the addon through Forge. Register taint metadata once during
+`FMLCommonSetupEvent.enqueueWork`, on both physical sides, before loading worlds:
+
+```java
+event.enqueueWork(() -> {
+    TaintApi taint = ThaumicRebornApi.taint();
+    ResourceLocation taintedFox = ResourceLocation.fromNamespaceAndPath("example", "tainted_fox");
+
+    // Existing Forge entity type: infect ground every 20 ticks, also spread its
+    // biome, and transmit 160 ticks of Flux Taint on damaging attacks.
+    taint.registerMob(new TaintMobDefinition(taintedFox, 20, true, 160));
+    taint.registerMobConversion(
+        ResourceLocation.fromNamespaceAndPath("minecraft", "fox"), taintedFox);
+
+    taint.registerSpreadSource(
+        ResourceLocation.fromNamespaceAndPath("example", "taint_seed"));
+    taint.registerBlockConversion(new TaintBlockConversion(
+        ResourceLocation.fromNamespaceAndPath("example", "soil_infection"),
+        ExampleBlocks.CLEAN_SOIL.get(), ExampleBlocks.TAINTED_SOIL.get().defaultBlockState()));
+    taint.registerSpreadSource(
+        ResourceLocation.fromNamespaceAndPath("example", "tainted_soil"));
+});
+```
+
+Mob definitions make the entity tainted for immunity and conversion checks;
+they do not change its AI or visuals. Zero terrain interval disables automatic
+ground infection; zero attack duration disables attack infection. Terrain actions
+respect `mobGriefing` and Forge's mob-griefing event. Registered conversion targets
+are also used by the normal infected-death handler; `TaintImmune`, players and
+already tainted mobs cannot be converted. An explicit `convert(victim)` does not
+require an existing infection effect and removes the victim only after a
+replacement has been inserted successfully. Names are preserved; arbitrary addon
+NBT is not copied. Failed death replacements leave ordinary death handling intact.
+
+Passive source blocks are sampled in vanilla's ticking chunks at `randomTickSpeed`,
+even if their block class does not opt into random ticks. They can seed taint
+outside Tainted Lands, count as taint neighbours for native ecology, and are not
+decayed by the addon spread operation. `randomTickSpeed=0` disables this automatic
+block sampling. `taintSpreadRate=0` disables the biome part of addon spread, matching
+the main mod's setting; block infection is separate. No unloaded chunks are loaded.
+Sources and conversions are independent: register a conversion result as a source
+as well if it should continue spreading.
+
+Custom block rules run before native fallback, ordered by ascending rule ID,
+independent of registration order. Duplicate IDs are rejected. For tags or state
+properties use the predicate/function constructor, for example:
+
+```java
+new TaintBlockConversion(ruleId,
+    state -> state.is(mySoilTag),
+    state -> ExampleBlocks.TAINTED_SOIL.get().defaultBlockState());
+```
+
+Callbacks must be deterministic, side-effect-free, and return non-null states.
+A matching rule returning the original state intentionally prevents native fallback.
+Rules apply to both native ecology random ticks and explicit API block infection.
+
+At runtime, call these operations on the server thread:
+
+```java
+taint.infect(victim, 160, 0);                   // Flux Taint, duration/amplifier
+taint.infectBlock(level, groundPosition);        // One deterministic conversion
+taint.spreadFrom(level, sourcePosition);         // One bounded random spread attempt
+taint.spawn(level, spawnPosition, taintedFox);   // Optional<Mob>
+taint.convert(victim);                          // Optional<Mob>, immediate conversion
+```
+
+`infect` rejects immune, tainted and undead targets. `spawn` accepts registered or
+native tainted mobs and checks placement collisions. World operations reject
+unloaded positions and positions outside the build limits/world border. Direct
+block operations are intended for addon-controlled use; when calling from custom
+mob logic, the addon must check mob-griefing permission as the automatic path does.
+
+Use the matching rebuilt main mod with API 2.0.9. Older providers return an
+unsupported taint service: registrations throw `UnsupportedOperationException`,
+and mutations decline with `false`/`Optional.empty()`. Keep the API `compileOnly`;
+addons must not bundle their own copy.
+
+## Creating aura nodes (2.0.8)
+
+Call on the server thread with a `ServerLevel` and an absolute `BlockPos`:
+
+```java
+boolean created = ThaumicRebornApi.aura().create(
+    level, position, AuraNodeType.PURE, AuraNodeModifier.BRIGHT,
+    Map.of("aer", 40, "ordo", 25));
+```
+
+This places a native aura-node block, gives it a fresh UUID and fills its current
+and maximum aspect pools equally. Primal and compound aspect IDs are supported.
+To specify partially depleted pools or an existing identity, use
+`create(level, position, new AuraNode(id, type, modifier, current, maximum, revision))`.
+Both maps must have the same non-empty set of lowercase aspect IDs and non-negative
+amounts, current must not exceed maximum, and revision must be non-negative.
+Invalid state throws `IllegalArgumentException` before any block is placed.
+
+Creation returns `false` for occupied positions, unloaded chunks, positions
+outside the build limits/world border, or older providers without this feature.
+It does not load chunks or overwrite blocks. The matching main-mod bridge handles
+saving, client synchronization and spatial queries. `initialize(...)` remains
+available for an already placed, uninitialized node block.
+
+Use API 2.0.8 with a matching rebuilt provider; the API alone does not implement
+world placement. This creates instances of the existing node types, not new
+registered node types or renderers. Keep the API `compileOnly` in addons.
 
 ## Custom focus upgrades (2.0.7)
 
